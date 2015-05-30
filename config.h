@@ -20,7 +20,7 @@ static const Bool showbar           = True;     /* False means no bar */
 static const Bool topbar            = True;     /* False means bottom bar */
 
 /* tagging */
-static const char *tags[] = { "def", "term", "web", "test", "5", "6", "7", "8", "9" };
+static const char *tags[] = { "def", "term", "work", "junk", "neovim", "web", "temp" };
 
 static const Rule rules[] = {
 	/* xprop(1):
@@ -29,7 +29,7 @@ static const Rule rules[] = {
 	 */
 	/* class      instance    title       tags mask     isfloating   monitor */
 	{ "Gimp",     NULL,       NULL,       0,            True,        -1 },
-	{ "Firefox",  NULL,       NULL,       1 << 2,       False,       -1 },
+	{ "Firefox",  NULL,       NULL,       1 << 5,       True,        -1 },
 };
 
 /* layout(s) */
@@ -39,9 +39,9 @@ static const Bool resizehints = True; /* True means respect size hints in tiled 
 
 static const Layout layouts[] = {
 	/* symbol     arrange function */
-	{ "[]=",      tile },    /* first entry is default */
+	{ "[#]",      tile },    /* first entry is default */
 	{ "><>",      NULL },    /* no layout function means floating behavior */
-	{ "[M]",      monocle },
+	{ "[_]",      monocle },
 };
 
 /* key definitions */
@@ -85,14 +85,14 @@ static Key keys[] = {
 	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
 	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
 	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
-	{ MODKEY,                       XK_Down,   moveresize,     {.v = "0x 25y 0w 0h"}},
-	{ MODKEY,                       XK_Up,     moveresize,     {.v = "0x -25y 0w 0h"}},
-	{ MODKEY,                       XK_Right,  moveresize,     {.v = "25x 0y 0w 0h"}},
-	{ MODKEY,                       XK_Left,   moveresize,     {.v = "-25x 0y 0w 0h"}},
-	{ MODKEY|ShiftMask,             XK_Down,   moveresize,     {.v = "0x 0y 0w 25h"}},
-	{ MODKEY|ShiftMask,             XK_Up,     moveresize,     {.v = "0x 0y 0w -25h"}},
-	{ MODKEY|ShiftMask,             XK_Right,  moveresize,     {.v = "0x 0y 25w 0h"}},
-	{ MODKEY|ShiftMask,             XK_Left,   moveresize,     {.v = "0x 0y -25w 0h"}},
+	{ MODKEY,                       XK_Down,   moveresize,     {.v = "0x 10y 0w 0h"}},
+	{ MODKEY,                       XK_Up,     moveresize,     {.v = "0x -10y 0w 0h"}},
+	{ MODKEY,                       XK_Right,  moveresize,     {.v = "10x 0y 0w 0h"}},
+	{ MODKEY,                       XK_Left,   moveresize,     {.v = "-10x 0y 0w 0h"}},
+	{ MODKEY|ShiftMask,             XK_Down,   moveresize,     {.v = "0x 0y 0w 10h"}},
+	{ MODKEY|ShiftMask,             XK_Up,     moveresize,     {.v = "0x 0y 0w -10h"}},
+	{ MODKEY|ShiftMask,             XK_Right,  moveresize,     {.v = "0x 0y 10w 0h"}},
+	{ MODKEY|ShiftMask,             XK_Left,   moveresize,     {.v = "0x 0y -10w 0h"}},
 	TAGKEYS(                        XK_1,                      0)
 	TAGKEYS(                        XK_2,                      1)
 	TAGKEYS(                        XK_3,                      2)
