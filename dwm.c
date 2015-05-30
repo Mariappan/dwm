@@ -2075,6 +2075,7 @@ zoom(const Arg *arg) {
 }
 
 #include "moveresize.c"
+#include "shiftview.c"
 
 int
 main(int argc, char *argv[]) {
