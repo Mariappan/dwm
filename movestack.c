@@ -46,7 +46,7 @@ movestack(const Arg *arg) {
 		else if(c == clients)
 			clients = sel;
 
-		arrange();
+		arrange(selmon);
 	}
 }
 
