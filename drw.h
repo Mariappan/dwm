@@ -31,6 +31,7 @@ typedef struct {
 	int screen;
 	Window root;
 	Drawable drawable;
+	Drawable tabdrawable;
 	GC gc;
 	ClrScheme *scheme;
 	size_t fontcount;
