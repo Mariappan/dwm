@@ -233,7 +233,7 @@ drw_tabtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, const char *
     int ret;
 
     tabtxt = 1;
-    ret = drw_tabtext(drw, x, y, w, h, text, invert);
+    ret = drw_text(drw, x, y, w, h, text, invert);
     tabtxt = 0;
 
     return ret;

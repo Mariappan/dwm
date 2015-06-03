@@ -295,6 +295,7 @@ struct Pertag {
 	unsigned int sellts[LENGTH(tags) + 1]; /* selected layouts */
 	const Layout *ltidxs[LENGTH(tags) + 1][2]; /* matrix of tags and layouts indexes  */
 	Bool showbars[LENGTH(tags) + 1]; /* display bar for the current tag */
+	Bool showtabs[LENGTH(tags) + 1]; /* display tab bar for the current tag */
 	Client *prevzooms[LENGTH(tags) + 1]; /* store zoom information */
 };
 
@@ -730,6 +731,9 @@ createmon(void) {
 		/* init showbar */
 		m->pertag->showbars[i] = m->showbar;
 
+		/* init showtab */
+		m->pertag->showtabs[i] = m->showtab;
+
 		/* swap focus and zoomswap*/
 		m->pertag->prevzooms[i] = NULL;
 	}
@@ -920,6 +924,7 @@ drawtab(Monitor *m) {
 	  if(m->tab_widths[i] >  maxsize) m->tab_widths[i] = maxsize;
 	  w = m->tab_widths[i];
 	  //col = (c == m->sel)  ? dc.sel : dc.norm;
+	  drw_setscheme(drw, (c == m->sel) ? &scheme[SchemeSel] : &scheme[SchemeNorm]);
 	  drw_tabtext(drw, x, 0, w, th, c->name, 0);
 	  x += w;
 	  ++i;
@@ -995,7 +1000,7 @@ focus(Client *c) {
 	}
 	selmon->sel = c;
 	drawbars();
-	drawtabs();
+	drawtabs(); // MARI
 }
 
 void
@@ -1720,6 +1725,8 @@ void
 setup(void) {
 	XSetWindowAttributes wa;
 
+
+
 	/* clean up any zombies immediately */
 	sigchld(0);
 
@@ -1734,7 +1741,7 @@ setup(void) {
 		die("No fonts could be loaded.\n");
 	bh = drw->fonts[0]->h + 2;
 	th = bh;
-    if (drw->tabdrawable)
+    if (!drw->tabdrawable)
         drw->tabdrawable = XCreatePixmap(dpy, root, sw, th, DefaultDepth(dpy, screen)); // MARI
 	updategeom();
 	/* init atoms */
@@ -1872,6 +1879,7 @@ tabmode(const Arg *arg) {
 		selmon->showtab = arg->ui % showtab_nmodes;
 	else
 		selmon->showtab = (selmon->showtab + 1 ) % showtab_nmodes;
+	selmon->pertag->showtabs[selmon->pertag->curtag] = selmon->showtab;
 	arrange(selmon);
 }
 
@@ -1928,6 +1936,8 @@ toggleview(const Arg *arg) {
 		selmon->lt[selmon->sellt^1] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt^1];
 		if (selmon->showbar != selmon->pertag->showbars[selmon->pertag->curtag])
 			togglebar(NULL);
+		if (selmon->showtab != selmon->pertag->showtabs[selmon->pertag->curtag])
+			tabmode(NULL);
 		focus(NULL);
 		arrange(selmon);
 	}
@@ -2021,7 +2031,7 @@ updatebarpos(Monitor *m) {
 		if ( m->topbar )
 			m->wy += bh;
 	}
-	else 
+	else
 		m->by = -bh;
 
 	for(c = m->clients; c; c = c->next){
@@ -2273,6 +2283,8 @@ view(const Arg *arg) {
 	selmon->lt[selmon->sellt^1] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt^1];
 	if (selmon->showbar != selmon->pertag->showbars[selmon->pertag->curtag])
 		togglebar(NULL);
+	if (selmon->showtab != selmon->pertag->showtabs[selmon->pertag->curtag])
+		tabmode(NULL);
 	focus(NULL);
 	arrange(selmon);
 }
