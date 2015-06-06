@@ -1734,8 +1734,6 @@ setup(void) {
 		die("No fonts could be loaded.\n");
 	bh = drw->fonts[0]->h + 2;
 	th = bh;
-    if (!drw->tabdrawable)
-        drw->tabdrawable = XCreatePixmap(dpy, root, sw, th, DefaultDepth(dpy, screen)); // MARI
 	updategeom();
 	/* init atoms */
 	wmatom[WMProtocols] = XInternAtom(dpy, "WM_PROTOCOLS", False);

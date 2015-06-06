@@ -70,7 +70,7 @@ drw_create(Display *dpy, int screen, Window root, unsigned int w, unsigned int h
 	drw->w = w;
 	drw->h = h;
 	drw->drawable = XCreatePixmap(dpy, root, w, h, DefaultDepth(dpy, screen));
-	/*drw->tabdrawable = XCreatePixmap(dpy, root, DisplayWidth(dpy, screen), th, DefaultDepth(dpy, screen));*/ // MARI
+	drw->tabdrawable = XCreatePixmap(dpy, root, w, h, DefaultDepth(dpy, screen));// MARI
 	drw->gc = XCreateGC(dpy, root, 0, NULL);
 	drw->fontcount = 0;
 	XSetLineAttributes(dpy, drw->gc, 1, LineSolid, CapButt, JoinMiter);
@@ -89,7 +89,6 @@ drw_resize(Drw *drw, unsigned int w, unsigned int h) {
 	if(drw->tabdrawable != 0)
 		XFreePixmap(drw->dpy, drw->tabdrawable);
 	drw->tabdrawable = XCreatePixmap(drw->dpy, drw->root, w, th, DefaultDepth(drw->dpy, drw->screen));
-	//drw->tabdrawable = XCreatePixmap(drw->dpy, drw->root, sw, th, DefaultDepth(drw->dpy, drw->screen)); // MARI Change w to sw
 }
 
 void
