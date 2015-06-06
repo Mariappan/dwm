@@ -823,16 +823,9 @@ drawbar(Monitor *m) {
 		x = m->ww;
 	if((w = x - xx) > bh) {
 		x = xx;
-		if(m->sel) {
-			drw_setscheme(drw, m == selmon ? &scheme[SchemeSel] : &scheme[SchemeNorm]);
-			drw_text(drw, x, 0, w, bh, m->sel->name, 0);
-			drw_rect(drw, x, 0, w, bh, m->sel->isfixed, m->sel->isfloating, 0);
-		}
-		else {
-			drw_setscheme(drw, &scheme[SchemeNorm]);
-			drw_text(drw, x, 0, w, bh, NULL, 0);
-		}
-	}
+        drw_setscheme(drw, &scheme[SchemeNorm]);
+        drw_text(drw, x, 0, w, bh, NULL, 0);
+    }
 	drw_map(drw, m->barwin, 0, 0, m->ww, bh);
 }
 
@@ -864,7 +857,7 @@ cmpint(const void *p1, const void *p2) {
 void
 drawtab(Monitor *m) {
 	//unsigned long *col;
-	int x, d = 0, w; // MARI Fix d
+	int x, w;
 	Client *c;
 	int i;
 	int itag = -1;
@@ -932,14 +925,14 @@ drawtab(Monitor *m) {
 
 	/* cleans interspace between window names and current viewed tag label */
 	w = m->ww - view_info_w - x;
-	//drwtext(NULL, dc.norm, 0);
+	drw_setscheme(drw, &scheme[SchemeNorm]);
 	drw_tabtext(drw, x, 0, w, th, NULL, 0);
 
 	/* view info */
-	x += d;
+	x += w;
 	w = view_info_w;
-	//drwtext(view_info, dc.norm, 0);
-	drw_tabtext(drw, x, 0, w, th, NULL, 0);
+	drw_setscheme(drw, &scheme[SchemeNorm]);
+	drw_tabtext(drw, x, 0, w, th, view_info, 0);
 
 	XCopyArea(drw->dpy, drw->tabdrawable, m->tabwin, drw->gc, 0, 0, m->ww, th, 0, 0);
 	XSync(drw->dpy, False);
@@ -1000,7 +993,7 @@ focus(Client *c) {
 	}
 	selmon->sel = c;
 	drawbars();
-	drawtabs(); // MARI
+	drawtabs();
 }
 
 void
