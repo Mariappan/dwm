@@ -11,6 +11,9 @@
 #define UTF_INVALID 0xFFFD
 #define UTF_SIZ 4
 
+
+extern int th;                 /* tab bar geometry */
+
 static const unsigned char utfbyte[UTF_SIZ + 1] = {0x80,    0, 0xC0, 0xE0, 0xF0};
 static const unsigned char utfmask[UTF_SIZ + 1] = {0xC0, 0x80, 0xE0, 0xF0, 0xF8};
 static const long utfmin[UTF_SIZ + 1] = {       0,    0,  0x80,  0x800,  0x10000};
@@ -67,6 +70,7 @@ drw_create(Display *dpy, int screen, Window root, unsigned int w, unsigned int h
 	drw->w = w;
 	drw->h = h;
 	drw->drawable = XCreatePixmap(dpy, root, w, h, DefaultDepth(dpy, screen));
+	drw->tabdrawable = XCreatePixmap(dpy, root, w, h, DefaultDepth(dpy, screen));// MARI
 	drw->gc = XCreateGC(dpy, root, 0, NULL);
 	drw->fontcount = 0;
 	XSetLineAttributes(dpy, drw->gc, 1, LineSolid, CapButt, JoinMiter);
@@ -82,6 +86,9 @@ drw_resize(Drw *drw, unsigned int w, unsigned int h) {
 	if(drw->drawable != 0)
 		XFreePixmap(drw->dpy, drw->drawable);
 	drw->drawable = XCreatePixmap(drw->dpy, drw->root, w, h, DefaultDepth(drw->dpy, drw->screen));
+	if(drw->tabdrawable != 0)
+		XFreePixmap(drw->dpy, drw->tabdrawable);
+	drw->tabdrawable = XCreatePixmap(drw->dpy, drw->root, w, th, DefaultDepth(drw->dpy, drw->screen));
 }
 
 void
@@ -91,6 +98,8 @@ drw_free(Drw *drw) {
 		drw_font_free(drw->fonts[i]);
 	}
 	XFreePixmap(drw->dpy, drw->drawable);
+    if (drw->tabdrawable)
+        XFreePixmap(drw->dpy, drw->tabdrawable);
 	XFreeGC(drw->dpy, drw->gc);
 	free(drw);
 }
@@ -216,6 +225,19 @@ drw_rect(Drw *drw, int x, int y, unsigned int w, unsigned int h, int filled, int
 		XDrawRectangle(drw->dpy, drw->drawable, drw->gc, x+1, y+1, dx, dx);
 }
 
+static int tabtxt = 0;
+
+int
+drw_tabtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, const char *text, int invert) {
+    int ret;
+
+    tabtxt = 1;
+    ret = drw_text(drw, x, y, w, h, text, invert);
+    tabtxt = 0;
+
+    return ret;
+}
+
 int
 drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, const char *text, int invert) {
 	char buf[1024];
@@ -243,7 +265,10 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, const char *tex
 		return 0;
 	} else if (render) {
 		XSetForeground(drw->dpy, drw->gc, invert ? drw->scheme->fg->pix : drw->scheme->bg->pix);
-		XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w, h);
+        if (tabtxt == 1 && drw->tabdrawable)
+            XFillRectangle(drw->dpy, drw->tabdrawable, drw->gc, x, y, w, h);
+        else
+            XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w, h);
 	}
 
 	if (!text || !drw->fontcount) {
@@ -251,7 +276,10 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, const char *tex
 	} else if (render) {
 		cmap = DefaultColormap(drw->dpy, drw->screen);
 		vis = DefaultVisual(drw->dpy, drw->screen);
-		d = XftDrawCreate(drw->dpy, drw->drawable, vis, cmap);
+        if (tabtxt == 1 && drw->tabdrawable)
+            d = XftDrawCreate(drw->dpy, drw->tabdrawable, vis, cmap);
+        else
+            d = XftDrawCreate(drw->dpy, drw->drawable, vis, cmap);
 	}
 
 	curfont = drw->fonts[0];
