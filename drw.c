@@ -245,7 +245,7 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, const char *tex
 	Extnts tex;
 	Colormap cmap;
 	Visual *vis;
-	XftDraw *d;
+	XftDraw *d = NULL;
 	Fnt *curfont, *nextfont;
 	size_t i, len;
 	int utf8strlen, utf8charlen, render;
