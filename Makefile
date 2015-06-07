@@ -6,7 +6,7 @@ include config.mk
 SRC = drw.c dwm.c util.c
 OBJ = ${SRC:.c=.o}
 
-all: options dwm
+all: options dwm dwmstatus
 
 options:
 	@echo dwm build options:
@@ -28,9 +28,13 @@ dwm: ${OBJ}
 	@echo CC -o $@
 	@${CC} -o $@ ${OBJ} ${LDFLAGS}
 
+dwmstatus: ${OBJ}
+	@echo CC -o $@
+	@${CC} -o $@ ${OBJ} ${LDFLAGS} -lasound
+
 clean:
 	@echo cleaning
-	@rm -f dwm ${OBJ} dwm-${VERSION}.tar.gz
+	@rm -f dwm ${OBJ} dwm-${VERSION}.tar.gz dwmstatus
 
 dist: clean
 	@echo creating dist tarball
@@ -45,6 +49,7 @@ install: all
 	@echo installing executable file to ${DESTDIR}${PREFIX}/bin
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
 	@cp -f dwm ${DESTDIR}${PREFIX}/bin
+	@cp -f dwmstatus ${DESTDIR}${PREFIX}/bin
 	@chmod 755 ${DESTDIR}${PREFIX}/bin/dwm
 	@echo installing manual page to ${DESTDIR}${MANPREFIX}/man1
 	@mkdir -p ${DESTDIR}${MANPREFIX}/man1
@@ -54,6 +59,7 @@ install: all
 uninstall:
 	@echo removing executable file from ${DESTDIR}${PREFIX}/bin
 	@rm -f ${DESTDIR}${PREFIX}/bin/dwm
+	@rm -f ${DESTDIR}${PREFIX}/bin/dwmstatus
 	@echo removing manual page from ${DESTDIR}${MANPREFIX}/man1
 	@rm -f ${DESTDIR}${MANPREFIX}/man1/dwm.1
 
