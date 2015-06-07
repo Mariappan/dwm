@@ -28,9 +28,10 @@ dwm: ${OBJ}
 	@echo CC -o $@
 	@${CC} -o $@ ${OBJ} ${LDFLAGS}
 
-dwmstatus: ${OBJ}
+dwmstatus: dwmstatus.c
 	@echo CC -o $@
-	@${CC} -o $@ ${OBJ} ${LDFLAGS} -lasound
+	@${CC} -c ${CFLAGS} $<
+	@${CC} -o $@ $@.o -D_DEFAULT_SOURCE ${LDFLAGS} -lasound
 
 clean:
 	@echo cleaning
