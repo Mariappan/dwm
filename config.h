@@ -2,11 +2,11 @@
 
 /* appearance */
 static const char *fonts[] = {
-    "Incolsolata:size=11",
-    "Sans:size=10.5",
-    "VL Gothic:size=10.5",
-    "WenQuanYi Micro Hei:size=10.5",
+    "sansation:size=10.5",
+    "Bitstream Vera Sans Mono:size=10.5",
+    "tewi:size=14",
 };
+
 static const char dmenufont[] = "-*-terminus-medium-r-*-*-16-*-*-*-*-*-*-*";
 static const char normbordercolor[] = "#444444";
 static const char normbgcolor[]     = "#222222";
@@ -27,7 +27,7 @@ static const Bool toptab            = False;    /* False means bottom tab bar */
 
 
 /* tagging */
-static const char *tags[] = { "def", "term", "work", "junk", "neovim", "web", "temp" };
+static const char *tags[] = { "media", "term", "term2", "neovim", "junk", "web", "temp" };
 
 static const Rule rules[] = {
 	/* xprop(1):
