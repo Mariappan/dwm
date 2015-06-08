@@ -43,6 +43,12 @@ typedef struct {
 	unsigned int h;
 } Extnts;
 
+typedef struct {
+	const char border[8];
+	const char bg[8];
+	const char fg[8];
+} StatusColors;
+
 /* Drawable abstraction */
 Drw *drw_create(Display *dpy, int screen, Window win, unsigned int w, unsigned int h);
 void drw_resize(Drw *drw, unsigned int w, unsigned int h);

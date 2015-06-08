@@ -11,9 +11,9 @@ static const char dmenufont[] = "-*-terminus-medium-r-*-*-16-*-*-*-*-*-*-*";
 static const char normbordercolor[] = "#444444";
 static const char normbgcolor[]     = "#222222";
 static const char normfgcolor[]     = "#bbbbbb";
-static const char selbordercolor[]  = "#005577";
-static const char selbgcolor[]      = "#005577";
-static const char selfgcolor[]      = "#eeeeee";
+static const char selbordercolor[]  = "#444444";
+static const char selbgcolor[]      = "#222222";
+static const char selfgcolor[]      = "#268BD2";
 static const unsigned int borderpx  = 1;        /* border pixel of windows */
 static const unsigned int snap      = 32;       /* snap pixel */
 static const Bool showbar           = True;     /* False means no bar */
@@ -25,6 +25,49 @@ enum showtab_modes { showtab_never, showtab_auto, showtab_nmodes, showtab_always
 static const int showtab            = showtab_always; /* Default tab bar show mode */
 static const Bool toptab            = False;    /* False means bottom tab bar */
 
+static const StatusColors statuscolors[] =
+{
+	{
+		.border = "#444444",
+		.bg     = "#222222",
+		.fg     = "#96BE65"  // matte dark green
+	},
+	{
+		.border = "#444444",
+		.bg     = "#222222",
+		.fg     = "#695F6C"  // matte ciolet -ok
+	},
+	{
+		.border = "#444444",
+		.bg     = "#222222",
+		.fg     = "#BE7765"  // matte red - ok
+	},
+	{
+		.border = "#444444",
+		.bg     = "#222222",
+		.fg     = "#D2998B"  // matte pink - ok
+	},
+	{
+		.border = "#444444",
+		.bg     = "#222222",
+		.fg     = "#CED7D2"  // matte light blue -ok
+	},
+	{
+		.border = "#444444",
+		.bg     = "#222222",
+		.fg     = "#7C6F64"  // Dark Grey - ok
+	},
+};
+
+//"#F8F5F2"  // matte pure white
+//"#FCD384"  // matte yellow -ok
+//"#FADEA7"  // matte light yellow
+//"#9FB5C2"  // matte blue ok
+//"#D3C2A9"  // matte light yellow
+//"#9B7E9B"  // matte dark violet
+//"#96BE65"  // matte dark green
+//"#A5C085"  // matte light green
+//"#D3869B"  // Pink
 
 /* tagging */
 static const char *tags[] = { "media", "term", "term2", "neovim", "junk", "web", "temp" };

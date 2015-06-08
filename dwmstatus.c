@@ -85,7 +85,7 @@ loadavg(void)
 		exit(1);
 	}
 
-	return smprintf("\uf3a4 %.2f", avgs[0]);
+	return smprintf("\x03\uf3a4 %.2f", avgs[0]);
 }
 
 
@@ -96,7 +96,7 @@ up() {
     sysinfo(&info);
     h = info.uptime/3600;
     m = (info.uptime - h*3600 )/60;
-    return smprintf("\uf108 %dh%dm",h,m);
+    return smprintf("\x04\uf108 %dh%dm",h,m);
 }
 
 char *
@@ -134,7 +134,7 @@ get_volume(void)
     snd_mixer_selem_id_free(s_elem);
     snd_mixer_close(handle);
 
-    return smprintf("\uf028 %d",percent);
+    return smprintf("\x05\uf028 %d",percent);
 }
 
 int
@@ -204,7 +204,7 @@ get_netusage(unsigned long long int *rec, unsigned long long int *sent)
 	calculate_speed(downspeedstr, newrec, *rec);
 	calculate_speed(upspeedstr, newsent, *sent);
 
-	sprintf(retstr, "\uf063 %s   \uf062 %s", downspeedstr, upspeedstr);
+	sprintf(retstr, "\x01\uf063 %s  \x02\uf062 %s", downspeedstr, upspeedstr);
 	/*sprintf(retstr, "\uf175 %s \uf176 %s", downspeedstr, upspeedstr);*/
 
 	*rec = newrec;
@@ -214,16 +214,16 @@ get_netusage(unsigned long long int *rec, unsigned long long int *sent)
 
 static char *get_ram()
 {
-    uintmax_t used = 0, total = 0;
+    uintmax_t used = 0;
 
     struct sysinfo mem;
     sysinfo(&mem);
 
-    total   = (uintmax_t) mem.totalram / MB;
+    /*total   = (uintmax_t) mem.totalram / MB;*/
     used    = (uintmax_t) (mem.totalram - mem.freeram -
                      mem.bufferram - mem.sharedram) / MB;
 
-    return smprintf("\uf3a5 %d", used);
+    return smprintf("\uf3a5 %dM", used);
 }
 
 void
@@ -273,7 +273,7 @@ main(void)
         {
             free(tmprs);
             free(uptm);
-            tmprs = mktimes("\uf073 %b-%d   \uF017 %I:%M  %p ", tz);
+            tmprs = mktimes("\x06\uf073 %b-%d   %I:%M  %p", tz);
             uptm = up();
 
             free(ram);
@@ -284,7 +284,7 @@ main(void)
         vol = get_volume();
 		netstats = get_netusage(&rec, &sent);
 
-		status = smprintf("%s  %s   %s   %s   %s  \u2000 %s",
+		status = smprintf("%s%s %s %s%s%s",
 				 netstats, avgs, ram, uptm, vol, tmprs);
 		setstatus(status);
         free(vol);

@@ -59,7 +59,11 @@
 
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
-enum { SchemeNorm, SchemeSel, SchemeLast }; /* color schemes */
+enum { SchemeNorm, SchemeSel,
+        SchemeStatus1, SchemeStatus2,
+        SchemeStatus3, SchemeStatus4,
+        SchemeStatus5, SchemeStatus6,
+        SchemeLast }; /* color schemes */
 enum { NetSupported, NetWMName, NetWMState,
        NetWMFullscreen, NetActiveWindow, NetWMWindowType,
        NetWMWindowTypeDialog, NetClientList, NetLast }; /* EWMH atoms */
@@ -543,6 +547,12 @@ cleanup(void) {
 	drw_clr_free(scheme[SchemeSel].border);
 	drw_clr_free(scheme[SchemeSel].bg);
 	drw_clr_free(scheme[SchemeSel].fg);
+	for (int loop = SchemeStatus1; loop < SchemeLast; loop++)
+	{
+		drw_clr_free(scheme[loop].border);
+		drw_clr_free(scheme[loop].bg);
+		drw_clr_free(scheme[loop].fg);
+	}
 	drw_free(drw);
 	XSync(dpy, False);
 	XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
@@ -786,6 +796,38 @@ dirtomon(int dir) {
 }
 
 void
+drawstatus(Drw *drw, int x, int y, unsigned int w, unsigned int h, const char *text, int pad) {
+	char *buf = text, *ptr = buf, c =1;
+	ClrScheme *oldscheme;
+	int i;
+
+	if(!drw || !drw->fontcount || !drw->scheme)
+		return;
+
+	oldscheme = drw->scheme;
+
+	while(*ptr) {
+		for(i = 0; *ptr < 0 || *ptr > 6; i++, ptr++); // MARI : Hardcoded 3
+		if(!*ptr)
+			break;
+		c = *ptr;
+		*ptr = 0;
+		if(i) {
+			x = drw_text(drw, x, y, w, h, buf, 0);
+			x += 10;
+		}
+		*ptr = c;
+		drw_setscheme(drw, &scheme[c + SchemeSel]);
+		buf = ++ptr;
+	}
+	drw_text(drw, x, y, w, h, buf, 0);
+
+	drw_setscheme(drw, oldscheme);
+
+    return;
+}
+
+void
 drawbar(Monitor *m) {
 	int x, xx, w;
 	unsigned int i, occ = 0, urg = 0;
@@ -817,7 +859,7 @@ drawbar(Monitor *m) {
 			x = xx;
 			w = m->ww - xx;
 		}
-		drw_text(drw, x, 0, w, bh, stext, 0);
+		drawstatus(drw, x, 0, w, bh, stext, 0);
 	}
 	else
 		x = m->ww;
@@ -931,7 +973,7 @@ drawtab(Monitor *m) {
 	/* view info */
 	x += w;
 	w = view_info_w;
-	drw_setscheme(drw, &scheme[SchemeNorm]);
+	drw_setscheme(drw, &scheme[SchemeStatus6]);
 	drw_tabtext(drw, x, 0, w, th, view_info, 0);
 
 	XCopyArea(drw->dpy, drw->tabdrawable, m->tabwin, drw->gc, 0, 0, m->ww, th, 0, 0);
@@ -1759,6 +1801,12 @@ setup(void) {
 	scheme[SchemeSel].border = drw_clr_create(drw, selbordercolor);
 	scheme[SchemeSel].bg = drw_clr_create(drw, selbgcolor);
 	scheme[SchemeSel].fg = drw_clr_create(drw, selfgcolor);
+	for (int loop = SchemeStatus1; loop < SchemeLast; loop++)
+	{
+		scheme[loop].border = drw_clr_create(drw, statuscolors[loop - SchemeStatus1].border);
+		scheme[loop].bg     = drw_clr_create(drw, statuscolors[loop - SchemeStatus1].bg);
+		scheme[loop].fg     = drw_clr_create(drw, statuscolors[loop - SchemeStatus1].fg);
+	}
 	/* init bars */
 	updatebars();
 	updatestatus();
