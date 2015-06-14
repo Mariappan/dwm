@@ -98,8 +98,8 @@ drw_free(Drw *drw) {
 		drw_font_free(drw->fonts[i]);
 	}
 	XFreePixmap(drw->dpy, drw->drawable);
-    if (drw->tabdrawable)
-        XFreePixmap(drw->dpy, drw->tabdrawable);
+	if (drw->tabdrawable)
+		XFreePixmap(drw->dpy, drw->tabdrawable);
 	XFreeGC(drw->dpy, drw->gc);
 	free(drw);
 }
@@ -125,7 +125,7 @@ drw_font_xcreate(Drw *drw, const char *fontname, FcPattern *fontpattern) {
 		 * missing-character-rectangles being drawn, at least with some fonts.
 		 */
 		if (!(font->xfont = XftFontOpenName(drw->dpy, drw->screen, fontname)) ||
-		    !(font->pattern = FcNameParse((FcChar8 *) fontname))) {
+				!(font->pattern = FcNameParse((FcChar8 *) fontname))) {
 			if (font->xfont) {
 				XftFontClose(drw->dpy, font->xfont);
 				font->xfont = NULL;
@@ -229,15 +229,16 @@ static int tabtxt = 0;
 
 int
 drw_tabtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, const char *text, int invert) {
-    int ret;
+	int ret;
 
-    tabtxt = 1;
-    ret = drw_text(drw, x, y, w, h, text, invert);
-    tabtxt = 0;
+	tabtxt = 1;
+	ret = drw_text(drw, x, y, w, h, text, invert);
+	tabtxt = 0;
 
-    return ret;
+	return ret;
 }
 
+extern int drawing_status;
 int
 drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, const char *text, int invert) {
 	char buf[1024];
@@ -265,10 +266,10 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, const char *tex
 		return 0;
 	} else if (render) {
 		XSetForeground(drw->dpy, drw->gc, invert ? drw->scheme->fg->pix : drw->scheme->bg->pix);
-        if (tabtxt == 1 && drw->tabdrawable)
-            XFillRectangle(drw->dpy, drw->tabdrawable, drw->gc, x, y, w, h);
-        else
-            XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w, h);
+		if (tabtxt == 1 && drw->tabdrawable)
+			XFillRectangle(drw->dpy, drw->tabdrawable, drw->gc, x, y, w, h);
+		else
+			XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w, h);
 	}
 
 	if (!text || !drw->fontcount) {
@@ -276,20 +277,28 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, const char *tex
 	} else if (render) {
 		cmap = DefaultColormap(drw->dpy, drw->screen);
 		vis = DefaultVisual(drw->dpy, drw->screen);
-        if (tabtxt == 1 && drw->tabdrawable)
-            d = XftDrawCreate(drw->dpy, drw->tabdrawable, vis, cmap);
-        else
-            d = XftDrawCreate(drw->dpy, drw->drawable, vis, cmap);
+		if (tabtxt == 1 && drw->tabdrawable)
+			d = XftDrawCreate(drw->dpy, drw->tabdrawable, vis, cmap);
+		else
+			d = XftDrawCreate(drw->dpy, drw->drawable, vis, cmap);
 	}
 
-	curfont = drw->fonts[0];
+	if (drawing_status == 1)
+		curfont = drw->fonts[1];
+	else
+		curfont = drw->fonts[0];
+
 	while (1) {
 		utf8strlen = 0;
 		utf8str = text;
 		nextfont = NULL;
 		while (*text) {
 			utf8charlen = utf8decode(text, &utf8codepoint, UTF_SIZ);
-			for (i = 0; i < drw->fontcount; i++) {
+			if (drawing_status == 1)
+				i = 1;
+			else
+				i = 0;;
+			for (; i < drw->fontcount; i++) {
 				charexists = charexists || XftCharExists(drw->dpy, drw->fonts[i]->xfont, utf8codepoint);
 				if (charexists) {
 					if (drw->fonts[i] == curfont) {

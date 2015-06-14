@@ -21,6 +21,10 @@
 #include <alsa/asoundlib.h>
 #include <alsa/control.h>
 
+#include <iwlib.h>
+
+#define WIFI "wlp4s0"
+
 
 #define MB 1048576
 #define GB 1073741824
@@ -134,7 +138,7 @@ get_volume(void)
     snd_mixer_selem_id_free(s_elem);
     snd_mixer_close(handle);
 
-    return smprintf("\x05\uf028 %d",percent);
+    return smprintf("\x05\uf028 %03d",percent);
 }
 
 int
@@ -180,9 +184,9 @@ calculate_speed(char *speedstr, unsigned long long int newval, unsigned long lon
 	speed = (newval - oldval) / 1024.0;
 	if (speed > 1024.0) {
 	    speed /= 1024.0;
-	    sprintf(speedstr, "%5.3f M", speed);
+	    sprintf(speedstr, "%4.0f M", speed);
 	} else {
-	    sprintf(speedstr, "%5.2f K", speed);
+	    sprintf(speedstr, "%4.0f K", speed);
 	}
 }
 
@@ -204,7 +208,7 @@ get_netusage(unsigned long long int *rec, unsigned long long int *sent)
 	calculate_speed(downspeedstr, newrec, *rec);
 	calculate_speed(upspeedstr, newsent, *sent);
 
-	sprintf(retstr, "\x01\uf063 %s  \x02\uf062 %s", downspeedstr, upspeedstr);
+	sprintf(retstr, "\x01%s\uf063 \x02%s\uf062 ", downspeedstr, upspeedstr);
 	/*sprintf(retstr, "\uf175 %s \uf176 %s", downspeedstr, upspeedstr);*/
 
 	*rec = newrec;
@@ -223,7 +227,69 @@ static char *get_ram()
     used    = (uintmax_t) (mem.totalram - mem.freeram -
                      mem.bufferram - mem.sharedram) / MB;
 
-    return smprintf("\uf3a5 %dM", used);
+    return smprintf("\uf3a5 %04dM", used);
+}
+
+static char * get_wifi_qual() {
+    // wireless info variables
+    int skfd, has_bitrate = 0;
+    struct wireless_info *winfo;
+    struct iwreq wrq;
+    char wi_bitrate[10];
+    char * output = NULL;
+
+    winfo = (struct wireless_info *) malloc(sizeof(struct wireless_info));
+    memset(winfo, 0, sizeof(struct wireless_info));
+
+    skfd = iw_sockets_open();
+    if (iw_get_basic_config(skfd, WIFI, &(winfo->b)) > -1) {
+
+        // set present winfo variables
+        if (iw_get_stats(skfd, WIFI, &(winfo->stats),
+                &winfo->range, winfo->has_range) >= 0) {
+            winfo->has_stats = 1;
+        }
+        if (iw_get_range_info(skfd, WIFI, &(winfo->range)) >= 0) {
+            winfo->has_range = 1;
+        }
+        if (iw_get_ext(skfd, WIFI, SIOCGIWAP, &wrq) >= 0) {
+            winfo->has_ap_addr = 1;
+            memcpy(&(winfo->ap_addr), &(wrq.u.ap_addr), sizeof(sockaddr));
+        }
+
+        // get bitrate
+        if (iw_get_ext(skfd, WIFI, SIOCGIWRATE, &wrq) >= 0) {
+            memcpy(&(winfo->bitrate), &(wrq.u.bitrate), sizeof(iwparam));
+            iw_print_bitrate(wi_bitrate, 16, winfo->bitrate.value);
+            has_bitrate = 1;
+            printf("\rBitrate = %s ", wi_bitrate);
+        }
+
+        /*printf("qual = %d ",winfo->stats.qual.qual);*/
+        /*printf("qual_max = %d ",winfo->range.max_qual.qual);*/
+        /*printf("qual_percent = %d%%",*/
+            /*(winfo->stats.qual.qual*100)/winfo->range.max_qual.qual);*/
+
+        // get essid
+         if (winfo->b.has_essid) {
+            if (winfo->b.essid_on) {
+                /*printf("essid = %s\n", winfo->b.essid);*/
+                output = smprintf("\uF33d %s", winfo->b.essid);
+            } else {
+                /*printf("essid = off/any\n");*/
+                output = smprintf("\uF33D %s", "Not Connected");
+            }
+        } else {
+            /*printf("essid = off/any\n");*/
+            output = smprintf("\uF33D %s", "Not Connected");
+        }
+
+    }
+    iw_sockets_close(skfd);
+    free(winfo);
+    fflush(stdout);
+
+    return output;
 }
 
 void
@@ -259,6 +325,7 @@ main(void)
     char *vol = NULL;
 	char *netstats = NULL;
     char *ram = NULL;
+    char *wifi = NULL;
 	static unsigned long long int rec, sent;
 
 	if (!(dpy = XOpenDisplay(NULL))) {
@@ -273,19 +340,24 @@ main(void)
         {
             free(tmprs);
             free(uptm);
-            tmprs = mktimes("\x06\uf073 %b-%d   %I:%M  %p", tz);
+            tmprs = mktimes("\x06\uf073 %b-%d %I:%M %p ", tz);
             uptm = up();
 
             free(ram);
             ram = get_ram();
+
+            free(wifi);
+            wifi = get_wifi_qual();
         }
         /* checks every second */
 		avgs = loadavg();
         vol = get_volume();
 		netstats = get_netusage(&rec, &sent);
 
-		status = smprintf("%s%s %s %s%s%s",
-				 netstats, avgs, ram, uptm, vol, tmprs);
+		/*status = smprintf("%s %s %s %s %s %s %s",*/
+				 /*wifi, netstats, avgs, ram, uptm, vol, tmprs);*/
+		status = smprintf("%s %s %s %s %s %s %s ",
+				 wifi, netstats, avgs, ram, uptm, vol, tmprs);
 		setstatus(status);
         free(vol);
 		free(avgs);

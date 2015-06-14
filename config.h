@@ -3,6 +3,7 @@
 /* appearance */
 static const char *fonts[] = {
     "sansation:size=10.5",
+    "bitocra13",
     "Bitstream Vera Sans Mono:size=10.5",
     "tewi:size=14",
 };
