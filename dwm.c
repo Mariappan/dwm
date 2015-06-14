@@ -795,16 +795,24 @@ dirtomon(int dir) {
 	return m;
 }
 
-void
-drawstatus(Drw *drw, int x, int y, unsigned int w, unsigned int h, const char *text, int pad) {
+int
+drawstatus(Monitor *m, int xx, const char *text) {
 	char *buf = text, *ptr = buf, c =1;
 	ClrScheme *oldscheme;
+	int x, y = 0, h = bh, w;
 	int i;
 
 	if(!drw || !drw->fontcount || !drw->scheme)
-		return;
+		return 0;
 
 	oldscheme = drw->scheme;
+
+	w = drw_statustext(drw, 0, 0, 0, 0, text, 0);
+	x = m->ww - w;
+	if(x < xx) {
+		x = xx;
+		w = m->ww - xx;
+	}
 
 	while(*ptr) {
 		for(i = 0; *ptr < 0 || *ptr > 6; i++, ptr++); // MARI : Hardcoded 3
@@ -813,18 +821,18 @@ drawstatus(Drw *drw, int x, int y, unsigned int w, unsigned int h, const char *t
 		c = *ptr;
 		*ptr = 0;
 		if(i) {
-			x = drw_text(drw, x, y, w, h, buf, 0);
-			x += 10;
+			x = drw_statustext(drw, x, y, w, h, buf, 0);
+			x += 3;
 		}
 		*ptr = c;
 		drw_setscheme(drw, &scheme[c + SchemeSel]);
 		buf = ++ptr;
 	}
-	drw_text(drw, x, y, w, h, buf, 0);
+	drw_statustext(drw, x, y, w, h, buf, 0);
 
 	drw_setscheme(drw, oldscheme);
 
-    return;
+    return w;
 }
 
 void
@@ -853,13 +861,8 @@ drawbar(Monitor *m) {
 	x += w;
 	xx = x;
 	if(m == selmon) { /* status is only drawn on selected monitor */
-		w = TEXTW(stext);
+		w = drawstatus(m, xx, stext);
 		x = m->ww - w;
-		if(x < xx) {
-			x = xx;
-			w = m->ww - xx;
-		}
-		drawstatus(drw, x, 0, w, bh, stext, 0);
 	}
 	else
 		x = m->ww;

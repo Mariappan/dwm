@@ -238,6 +238,8 @@ drw_tabtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, const char *
     return ret;
 }
 
+#include "statustext.c"
+
 int
 drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, const char *text, int invert) {
 	char buf[1024];
